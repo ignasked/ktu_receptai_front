@@ -36,7 +36,6 @@
         document.body.classList.add('blurred');
         newStep.text = '';
         newStep.duration = minStepDuration;
-        stepIngredients = [];
       } else {
         document.body.classList.remove('blurred');
       }
@@ -48,7 +47,6 @@
       // Add/remove blurred class when the modal is toggled
       if (editingStep) {
         document.body.classList.add('blurred');
-        stepIngredients = [];
       } else {
         document.body.classList.remove('blurred');
       }
@@ -231,27 +229,10 @@
     }
     async function addNewIngredient() {     
       console.log(newIngredient);
-      if (!newIngredient.name.trim()) {
+        if (!newIngredient.name.trim()) {
             alert('Step description cannot be empty.');
             return;
-      }
-      if(newIngredient.name.trim().length >100 || newIngredient.name.trim().length < 2){
-        error = "Ingredient name must be between 2 and 100 characters.";
-        alert(error);
-        return;
-      }
-      if(newIngredient.amount < 1){
-        error = "Ingredient amount must be greater than 0.";
-        alert(error);
-        return;
-      }
-      if(newIngredient.unit.trim().length >50 || newIngredient.unit.trim().length < 2){
-        error = "Ingredient unit must be between 2 and 50 characters.";
-        alert(error);
-        return;
-      }
-
-        
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/recipes/${id}/steps/${stepId}/ingredients`, {
                 method: 'POST',
@@ -271,7 +252,6 @@
             stepIngredients = [...stepIngredients, addedIngredient]; // Add the new step to the list
             //newStep = { text: '', duration: minStepDuration.toString()}; // Reset the form
             newIngredient = { name: '', amount: 0, unit: '' };
-            addingIngredient = false;
             //addingStep = false; // Hide the form
         } catch (err) {
             error = err.message;
@@ -298,44 +278,24 @@
             if (!response.ok){
               error = await response.json();
               alert(error);
-              console.log(error);
               throw new Error('Failed to add step.');
             } 
 
             const addedStep = await response.json();
-            await loadRecipeSteps(); // Add the new step to the list
-            //steps = [...steps, addedStep];
-            newStep = { text: '', duration: minStepDuration}; // Reset the form
+            steps = await loadRecipeSteps(); // Add the new step to the list
+            newStep = { text: '', duration: minStepDuration.toString()}; // Reset the form
             editingStep = false;// Hide the form
         } catch (err) {
             error = err.message;
-            console.log(err);
         }
     }
     async function updateIngredient() {
       //newStep.duration = formatDurationToDateTime(newStep.duration);
       console.log(newIngredient);
-      if (!newIngredient.name.trim()) {
+        if (!newIngredient.name.trim()) {
             alert('Step description cannot be empty.');
             return;
-      }
-      if(newIngredient.name.trim().length >100 || newIngredient.name.trim().length < 2){
-        error = "Ingredient name must be between 2 and 100 characters.";
-        alert(error);
-        return;
-      }
-      if(newIngredient.amount < 1){
-        error = "Ingredient amount must be greater than 0.";
-        alert(error);
-        return;
-      }
-      if(newIngredient.unit.trim().length >50 || newIngredient.unit.trim().length < 2){
-        error = "Ingredient unit must be between 2 and 50 characters.";
-        alert(error);
-        return;
-      }
-
-
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/recipes/${id}/steps/${stepId}/ingredients/${ingredientId}`, {
                 method: 'PUT',
@@ -348,7 +308,6 @@
             if (!response.ok){
               error = await response.json();
               alert(error);
-              console.log(error);
               throw new Error('Failed to add step.');
             } 
 
@@ -358,13 +317,11 @@
             editingIngredient = false;// Hide the form
             //editingStep = false;// Hide the form
         } catch (err) {
-            error = err;
-            console.log(error);
+            error = err.message;
         }
     }
 
     function startEditingStep(step) {
-      error = '';
       stepId = step.id;
       newStep.text = step.text;
       newStep.duration = formatSecondsFromDateTime(step.duration);
@@ -373,7 +330,6 @@
       toggleEditStepModal();
     }
     function startEditingIngredient(ingredient) {
-      error = '';
       editingIngredient = true;
       ingredientId = ingredient.id;
       newIngredient.name = ingredient.name;
@@ -382,17 +338,10 @@
       console.log(newIngredient);
     }
     function startAddingIngredient() {
-      error = '';
       addingIngredient = true;
       newIngredient.name = '';
       newIngredient.amount = 0;
       newIngredient.unit = '';   
-    }
-    function closeIngredientModal(){
-      error = '';
-      addingIngredient = false;
-      editingIngredient = false;
-
     }
 
     // Helper function to format duration (e.g., "00:10:00" -> "10 minutes")
@@ -434,124 +383,103 @@
   }
   </script>
 
-
-<!-- Add Ingredient Modal -->
-{#if addingIngredient || editingIngredient}
-<div class="modal" tabindex="-2" style="display:block;" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        {#if addingIngredient}
-          <h5 class="modal-title">Add New Ingredient</h5>
-        {/if}
-        {#if editingIngredient}
-          <h5 class="modal-title">Edit Ingredient</h5>
-        {/if}
-      </div>
-      <div class="modal-body">
-        {#if error}
-          <div class="alert alert-danger">{error}</div>
-        {/if}
-        <div class="d-flex flex-column mt-3">
-          <div class="mb-3">
-            <label for="newIngredient.name">Ingredient</label>
-            <input type="text" class="form-control {error ? 'is-invalid' : ''}" id="newIngredient.name" bind:value={newIngredient.name} placeholder="Enter ingredient name">
-          </div>
-          <div class="mb-3">
-            <label for="field2">Amount</label>
-            <input type="text" class="form-control {error ? 'is-invalid' : ''}" id="field2" bind:value={newIngredient.amount} placeholder="Enter amount">
-          </div>
-          <div class="mb-3">
-            <label for="field3">Unit</label>
-            <input type="text" class="form-control {error ? 'is-invalid' : ''}" id="field3" bind:value={newIngredient.unit} placeholder="Enter unit">
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        {#if editingIngredient}
-          <button type="button" class="btn btn-secondary" on:click={closeIngredientModal}>Cancel</button>
-          <button type="button" class="btn btn-primary" on:click={updateIngredient}>Update</button>
-        {/if}
-        {#if addingIngredient}
-          <button type="button" class="btn btn-secondary" on:click={closeIngredientModal}>Cancel</button>
-          <button type="button" class="btn btn-primary" on:click={addNewIngredient}>Add</button>
-        {/if}
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Add Step Modal -->
-{:else if addingStep || editingStep}
-<div class="modal" tabindex="-1" style="display:block;" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        {#if addingStep}
-          <h5 class="modal-title">Add New Step</h5>
-        {/if}
-        {#if editingStep}
-          <h5 class="modal-title">Edit Step</h5>
-        {/if}
-      </div>
-      <div class="modal-body">
-        {#if error}
-          <div class="alert alert-danger">{error}</div>
-        {/if}
-        <div class="form-group">
-          <label for="newStep.text">Step Description</label>
-          <textarea class="form-control {error ? 'is-invalid' : ''}" id="newStep.text" bind:value={newStep.text}></textarea>
+{#if addingStep || editingStep}
+  <div class="modal" tabindex="-1" style="display:block;" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          {#if addingStep}
+            <h5 class="modal-title">Add New Step</h5>
+          {/if}
+          {#if editingStep}
+            <h5 class="modal-title">Edit Step</h5>
+          {/if}
         </div>
-        <div class="form-group">
-          <label for="stepDuration">Duration</label>
-          <input
-            type="range"
-            class="form-control"
-            id="stepDuration"
-            min={minStepDuration}
-            max="3600"
-            bind:value={newStep.duration}
-          />
-          <p>{formatDurationFromSeconds(newStep.duration)}</p>
-        </div>
-
-        <!-- Ingredients List -->
-        {#if !addingStep && stepIngredients != null && stepIngredients.length > 0}
-          <h5 class="modal-title">Ingredient list:</h5>
-          <ul>
-            {#each stepIngredients as ingredient}
-              <li>
-                {#if checkAuthFunctions(ingredient.userId)}
+        <div class="modal-body">
+          {#if error}
+            <div class="alert alert-danger">{error}</div>
+          {/if}
+          <div class="form-group">
+            <label for="newStep.text">Step Description</label>
+            <textarea class="form-control" id="newStep.text" bind:value={newStep.text}></textarea>
+          </div>
+          <div class="form-group">
+            <label for="stepDuration">Duration</label>
+            <input
+              type="range"
+              class="form-control"
+              id="stepDuration"
+              min={minStepDuration}
+              max="3600"
+              bind:value={newStep.duration}
+            />
+            <p>{formatDurationFromSeconds(newStep.duration)}</p>
+          </div>
+        
+        {#if editingStep}        
+          <!-- Ingredients List -->
+          {#if stepIngredients != null && stepIngredients.length > 0}
+            <h5 class="modal-title">Ingredient list:</h5>
+            <ul>
+              {#each stepIngredients as ingredient}
+                <li>
                   <button class="btn btn-info btn-sm" on:click={() => startEditingIngredient(ingredient)}>Edit</button>
                   <button class="btn btn-danger btn-sm" on:click={() => deleteIngredient(ingredient.id)}>Delete</button>
-                {/if}
-                {ingredient.name}( {ingredient.amount} {ingredient.unit})
-              </li> <!-- Assuming each ingredient is a simple text; adjust if it's more complex -->
-            {/each}
-          </ul>
-        {/if}
-        {#if editingStep}
-          <button class="btn btn-success btn-sm" on:click={() => startAddingIngredient()}>Add Ingredient</button>
-        {/if}
+                  {ingredient.name}( {ingredient.amount} {ingredient.unit})
+                </li> <!-- Assuming each ingredient is a simple text; adjust if it's more complex -->
+              {/each}
+            </ul>
+          {/if}
+          {#if !addingIngredient}
+            <button class="btn btn-success btn-sm" on:click={() => startAddingIngredient()}>Add Ingredient</button>
+          {/if}
+          
 
+          {#if addingIngredient || editingIngredient}
+          <!-- Ingredients -->
+            <div class="d-flex flex-column mt-3">
+              <div class="mb-3">
+                <label for="newIngredient.name">Ingredient</label>
+                <input type="text" class="form-control" id="newIngredient.name" bind:value={newIngredient.name} placeholder="enter ingredient name">
+              </div>
+              <div class="mb-3">
+                <label for="field2">Amount</label>
+                <input type="text" class="form-control" id="field2" bind:value={newIngredient.amount} placeholder="enter amount">
+              </div>
+              <div class="mb-3">
+                <label for="field3">Unit</label>
+                <input type="text" class="form-control" id="field3" bind:value={newIngredient.unit} placeholder="enter unit">
+              </div>
+            </div>
+            {#if !editingIngredient}
+              <div class="form-group mt-3">
+                <button type="button" class="btn btn-success" on:click={addNewIngredient}>Add Ingredient</button>
+              </div>
+            {/if}
+            {#if editingIngredient}
+              <div class="form-group mt-3">
+                <button type="button" class="btn btn-success" on:click={updateIngredient}>Update Ingredient</button>
+              </div>
+            {/if}
+          {/if}
+        {/if}
       </div>
-      <div class="modal-footer">
-        {#if editingStep}
-          <button type="button" class="btn btn-secondary" on:click={toggleEditStepModal}>Cancel</button>
-          <button type="button" class="btn btn-primary" on:click={updateStep}>Save</button>
-        {/if}
-        {#if addingStep}
-          <button type="button" class="btn btn-secondary" on:click={toggleAddStepModal}>Cancel</button>
-          <button type="button" class="btn btn-primary" on:click={addNewStep}>Add</button>
-        {/if}
+        <div class="modal-footer">
+          
+          {#if editingStep}
+            <button type="button" class="btn btn-secondary" on:click={toggleEditStepModal}>Cancel</button>
+            <button type="button" class="btn btn-primary" on:click={updateStep}>Save</button>
+          {/if}
+          {#if addingStep}
+            <button type="button" class="btn btn-secondary" on:click={toggleAddStepModal}>Cancel</button>
+            <button type="button" class="btn btn-primary" on:click={addNewStep}>Add</button>
+          {/if}
+        </div>
       </div>
     </div>
   </div>
-</div>
 {/if}
-
-
-
 <!-- Modal Backdrop -->
 {#if addingStep || editingStep}
   <div class="modal-backdrop fade show"></div>
@@ -625,10 +553,8 @@
         <li>
           <p>{step.text}</p>
           <p><small>Duration: {formatDurationFromDateTime(step.duration)}</small></p>
-          {#if checkAuthFunctions(step.userId)}
-            <button on:click={deleteStep(step.id)}>Delete</button>
-            <button on:click={startEditingStep(step)}>Edit</button>
-          {/if}
+          <button on:click={deleteStep(step.id)}>Delete</button>
+          <button on:click={startEditingStep(step)}>Edit</button>
         </li>
       {/each}
     </ol>

@@ -8,6 +8,7 @@
   let recipeTitle = '';
   let currentStep = null;
   let stepIds = []; // Array of all step IDs
+  let stepIngredients = [];
   let currentStepIndex = 0; // Index of the current step in `stepIds`
   let error = '';
 
@@ -21,6 +22,8 @@
       });
 
       if (!response.ok) {
+        error = await response.json();
+        alert(error);
         throw new Error('Failed to load recipe title');
       }
 
@@ -41,6 +44,8 @@
       });
 
       if (!response.ok) {
+        error = await response.json();
+        alert(error);
         throw new Error('Failed to load steps indexes');
       }
 
@@ -55,6 +60,33 @@
     }
   }
 
+  async function loadStepIngredientsData() {
+    console.log("Loading step ingredients");
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${id}/steps/${currentStep.id}/ingredients`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json'},
+      });
+
+      if (!response.ok) {
+        error = await response.json();
+        alert(error);
+        throw new Error('Failed to load steps indexes');
+      }
+
+      stepIngredients = await response.json();
+      console.log(stepIngredients);
+      //stepIds = steps.map((step) => step.id); // Extract step IDs from the response
+
+      /*if (stepIds.length > 0) {
+        await loadStepData(0); // Load the first step
+      }*/
+    } catch (err) {
+      error = err.message;
+    }
+  }
+
+
   // Fetch the data for the step at `stepIndex`
   async function loadStepData(stepIndex) {
     try {
@@ -66,11 +98,15 @@
       });
 
       if (!response.ok) {
+        error = await response.json();
+        alert(error);
         throw new Error('Failed to load a step');
       }
 
       currentStep = await response.json();
       currentStepIndex = stepIndex;
+
+      await loadStepIngredientsData();
     } catch (err) {
       error = err.message;
     }
@@ -132,6 +168,15 @@
         <h2>Step {currentStepIndex + 1} of {stepIds.length}</h2>
         <p>{currentStep.text}</p>
         <p><strong>Duration:</strong> {formatDuration(currentStep.duration)}</p>
+        <!-- Display Ingredients -->
+        <h3>Ingredients: </h3>
+        {#if stepIngredients.length > 0}
+          <ul>
+            {#each stepIngredients as ingredient}
+              <li>{ingredient.name}( {ingredient.amount} {ingredient.unit})</li> <!-- Assuming each ingredient is a simple text; adjust if it's more complex -->
+            {/each}
+          </ul>
+        {/if}
       </div>
     </div>
 

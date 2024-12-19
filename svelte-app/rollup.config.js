@@ -74,5 +74,10 @@ export default {
 	],
 	watch: {
 		clearScreen: false
-	}
+	},
+	server: {
+		proxy: {
+		  '/api': 'https://jellyfish-app-tbyjw.ondigitalocean.app/'  // Replace with your API URL
+		}
+	  }
 };

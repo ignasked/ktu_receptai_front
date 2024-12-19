@@ -22,6 +22,8 @@
         credentials: 'include',
       });
       if (!response.ok) {
+        error = await response.json();
+        alert(error);
         throw new Error('Failed to fetch recipes');
       }
       recipes = await response.json();
@@ -46,9 +48,9 @@
   
    <!-- Header with Add Recipe Button -->
    <div class="header d-flex align-items-center mb-4">
-    <h1 class="me-3">All Recipes</h1> <!-- Added margin to separate the button -->
+    <h1 class="me-3">Recipes</h1> <!-- Added margin to separate the button -->
     <button
-      class="btn btn-success btn-lg rounded-circle add-recipe-btn"
+      class="btn btn-success btn-lg rounded-circle add-btn"
       on:click={createNewRecipe}
       title="Add New Recipe"
     >
@@ -109,21 +111,5 @@
       margin-right: 1rem; /* Adjust spacing between the heading and button */
     }
 
-    .add-recipe-btn {
-    font-size: 1.5rem;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    border: none;
-    color: white;
-    background-color: #28a745;
-  }
-
-  .add-recipe-btn:hover {
-    background-color: #218838;
-  }
 </style>
   

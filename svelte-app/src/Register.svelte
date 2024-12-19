@@ -2,7 +2,8 @@
     import { onMount } from "svelte";
     import { API_BASE_URL } from './constants.js';
     import { navigate } from "svelte-routing";
-  
+    let error = '';
+
     let Username = "";
     let Email = "";
     let Password = "";
@@ -10,6 +11,16 @@
     const registerUrl = `${API_BASE_URL}/accounts`;
 
     const handleRegister = async () => {
+        error = ''; // Clear any previous errors
+
+        // Validation
+        // Validation
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{16,100}$/;
+        if (!passwordRegex.test(Password)) {
+            error = 'Password must be 16-100 characters long, with at least one uppercase letter, one number, and one special character.';
+            return;
+        }
+
         try {
             const response = await fetch(registerUrl, {
                 method: "POST",
@@ -24,8 +35,9 @@
                 // Redirect or handle success
                 navigate("/login");
             } else {
-                const error = await response.json();
-                alert(`Error: ${error.message}`);
+                const error1 = await response.json();
+                alert(`Error: ${error1}`);
+                error = error1;
             }
         } catch (err) {
             alert('An error occurred. Please try again.');
@@ -70,11 +82,16 @@
         <input
             type="password"
             id="password"
-            class="form-control"
+            class="form-control  {error && !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{16,100}$/.test(Password) ? 'is-invalid' : ''}"
             bind:value={Password}
             placeholder="Enter password"
             required
         />
+        {#if error && !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{16,100}$/.test(Password)}
+            <div class="invalid-feedback">
+                Password must be 16-100 characters long, with at least one uppercase letter, one number, and one special character.
+            </div>
+        {/if}
     </div>
 
     <!-- Submit Button with spacing -->

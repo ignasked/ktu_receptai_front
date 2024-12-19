@@ -6,6 +6,7 @@
   //import 'https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css';
   //import './assets/css/bootstrap-icons.css';
   import {Lock, Person} from 'svelte-bootstrap-icons';
+  import {getUserName, isLoggedIn} from './jwtHelpers.js';
 
 
 
@@ -27,11 +28,15 @@
 
       if (!response.ok) {
         const errorData = await response.json();
-        error = errorData.message || 'Login failed!';
+        error = errorData || 'Login failed!';
+        alert(error);
       } else {
         const data = await response.json();
-        console.log('Login successful!', data); // Handle success (e.g., save token)
-        sessionStorage.setItem('authToken', data.token);
+        console.log('Login successful!', data.accessToken); // Handle success (e.g., save token)
+        sessionStorage.setItem('accessToken', data.accessToken);
+        getUserName();
+        isLoggedIn();
+        navigate('/recipes');
       }
     } catch (err) {
       error = 'An error occurred. Please try again.';
